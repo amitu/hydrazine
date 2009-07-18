@@ -1,0 +1,6 @@
+#!/bin/sh
+# crontab ignores the file is modification time is too close to
+# creation time. so we have to sleep for sometime.
+sleep 3
+
+echo "`/root/config BACKUP_INTERVAL` * * * * /root/backup" > $1

@@ -1,0 +1,11 @@
+#!/bin/bash
+
+set -e
+
+PACKAGES="vim "
+PACKAGES+="wget "
+
+# servers
+#PACKAGES="apache2 "
+
+apt-get install $PACKAGES -y

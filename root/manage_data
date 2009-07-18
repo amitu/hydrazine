@@ -1,0 +1,26 @@
+#!/usr/bin/python
+
+def run(cmd):
+    import commands
+    s, value = commands.getstatusoutput(cmd)
+    assert s == 0, value
+    print value
+    return value
+
+def config(key):
+    return run("/root/config %s" % key).strip()
+
+def get_latest_backup():
+    backup_profile = config("BACKUP_PROFILE")
+    return None
+
+def manage():
+    backup = get_latest_backup()
+    if backup:
+        run("/root/restore_backup")
+    else:
+        run("/root/initialize")
+    run("EDITOR=/root/cronny crontab -e")
+
+if __name__ == "__main__": 
+    manage()

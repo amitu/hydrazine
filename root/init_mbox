@@ -1,0 +1,42 @@
+#!/bin/bash
+
+set -e
+
+# gather command line options # {{{
+TEST_TOO=false 
+while getopts ":t" options; do
+	case $options in
+		t ) TEST_TOO=true;;
+		* ) echo -e "Usage: ./init_mbox [-p]";
+		    exit 1;;
+	esac
+done
+# }}}
+
+# initialization 
+# basic setup # {{{
+echo deb http://in.archive.ubuntu.com/ubuntu hardy main universe restricted > /etc/apt/sources.list
+echo deb http://in.archive.ubuntu.com/ubuntu hardy-updates main universe restricted>> /etc/apt/sources.list
+echo deb http://security.ubuntu.com/ubuntu hardy-security main universe restricted>> /etc/apt/sources.list
+echo 'Acquire::http { Proxy "http://apt_proxy:3142"; };' > /etc/apt/apt.conf.d/01proxy
+
+apt-get update
+apt-get upgrade -y
+apt-get install cron vim -y
+locale-gen en_IN
+# Removing the auto ./init_mbox command on logon
+(echo "g/init_mbox/d"; echo 'wq') | ex -s "/root/.bash_profile"
+#Setting the timezone
+echo 'Asia/Kolkata' > /etc/timezone
+dpkg-reconfigure -f noninteractive tzdata
+# }}}
+
+if [ -f "init_app" ]; then
+    . init_app
+fi
+
+manage_data
+
+if $TEST_TOO; then
+./test_mbox;
+fi

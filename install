@@ -1,0 +1,23 @@
+#!/bin/sh
+
+apt-get install schroot debootstrap apt-cacher-ng
+
+(echo "g/home/d"; echo 'wq') | ex -s /etc/schroot/mount-defaults
+if [ "`grep Downloads /etc/schroot/mount-defaults`" = "" ];then
+    echo "/var/Downloads  /root/Downloads none    rw,bind 0   0" >> /etc/schroot/mount-defaults
+fi
+
+cat <<END > /etc/schroot/copyfiles-defaults
+/etc/hosts
+/etc/resolv.conf
+END
+
+cp hy_* /usr/bin
+
+rm -rf /usr/share/hydrazine
+
+mkdir -p /usr/share/hydrazine/root
+cp -rf root /usr/share/hydrazine/
+
+mkdir -p /usr/share/hydrazine/template
+cp -rf template/ /usr/share/hydrazine/

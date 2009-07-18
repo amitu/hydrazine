@@ -1,0 +1,20 @@
+#!/bin/bash
+
+PREPARE_TOO=false 
+
+while getopts ":p" options; do
+	case $options in
+		p ) PREPARE_TOO=true;;
+		* ) echo -e "Usage: ./build [-p]";
+		    exit 1;;
+	esac
+done
+
+# build 
+echo building
+
+if $PREPARE_TOO; then
+./delete_mbox;
+#./prepare_mbox
+fi
+

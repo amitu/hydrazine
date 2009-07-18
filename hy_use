@@ -1,0 +1,6 @@
+#!/bin/bash
+
+PWD=`pwd`
+hydra_name=`basename $PWD`
+
+sudo schroot -c ${hydra_name} -d /root

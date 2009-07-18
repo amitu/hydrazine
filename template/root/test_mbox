@@ -1,0 +1,56 @@
+#!/usr/bin/python
+
+"""
+hydrazien Test Suite
+====================
+
+# README & basic setup {{{ 
+
+    Tests are written in Python 
+    [doctests are easiest way to test interactive command execution]
+
+    #doctest +ELLIPSIS 
+
+    Refer: 
+    http://www.amitu.com/blog/2007/july/vim-python-code-folding-and-my-vimrc/
+    to get code folding working. It will aid in reading this file a lot.
+
+    Note: These tests can be run as part of deb installation, but it should be
+    possible to run the tests manually, so we can tinker with the setup after deb
+    is installed and rerun the test suite.
+
+    Utility functions
+    -----------------
+
+    >>> import commands
+    >>> shell = commands.getstatusoutput
+    >>> shell_op = commands.getoutput
+    >>> shell_status = commands.getstatus
+    >>>
+
+# }}}
+
+# basic test to see if ls works # {{{
+
+    >>> shell("ls")
+    (0, 'init_mbox\nreadme.rst\ntest_mbox')
+    >>>
+
+# }}}
+
+
+"""
+
+# invoke unittests # {{{
+import unittest
+import doctest
+suite = unittest.TestSuite()
+suite.addTest(
+    doctest.DocFileSuite("test_mbox", optionflags=doctest.ELLIPSIS) 
+    # in future we can split the tests into separate modules if required.
+)
+
+if __name__ == "__main__":
+    unittest.TextTestRunner().run(suite)
+
+# }}}

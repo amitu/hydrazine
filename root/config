@@ -1,0 +1,19 @@
+#!/usr/bin/python 
+
+NAME = "hydrazine_default"
+BACKUP_PROFILE = "subversion_main"
+BACKUP_INTERVAL = "*/5" 
+
+def main():
+    import sys
+    config = globals()
+    if sys.argv[1] in config:
+        print config[sys.argv[1]]
+    else:
+        if len(sys.argv) > 2:
+            print sys.argv[2]
+        else:
+            raise KeyError, sys.argv[1]
+
+if __name__ == "__main__":
+    main()
