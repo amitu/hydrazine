@@ -1,0 +1,73 @@
+#!/bin/bash
+
+set -e 
+
+SOFTDIR="/root/Downloads"
+PACKAGES="wget sun-java6-jdk "
+
+apt-get install debconf debconf-utils -y
+echo -e "sun-java6-bin\tshared/accepted-sun-dlj-v1-1\tboolean\ttrue" > debconf
+echo -e "sun-java6-jdk\tshared/accepted-sun-dlj-v1-1\tboolean\ttrue" >> debconf
+echo -e "sun-java6-jre\tshared/accepted-sun-dlj-v1-1\tboolean\ttrue" >> debconf
+
+debconf-set-selections debconf
+sed -i "s/$/ multiverse/g" /etc/apt/sources.list
+apt-get update
+apt-get install $PACKAGES -y
+
+if [ ! -f $SOFTDIR/hadoop-0.18.3.tar.gz ]; then
+    wget -O $SOFTDIR/hadoop-0.18.3.tar.gz http://apache.inetbridge.net/hadoop/core/hadoop-0.18.3/hadoop-0.18.3.tar.gz 
+fi
+
+tar -xzf $SOFTDIR/hadoop-0.18.3.tar.gz
+sudo mv /root/hadoop-0.18.3 /root/hadoop
+mkdir /root/hadoop/tmp-dir/
+
+sed -i "s/# export JAVA_HOME.*/export JAVA_HOME=\/usr\/lib\/jvm\/java-6-sun/g" hadoop/conf/hadoop-env.sh
+
+export JAVA_HOME=/usr/lib/jvm/java-6-sun
+
+cat <<END > /root/hadoop/conf/hadoop-site.xml
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+
+<!-- Put site-specific property overrides in this file. -->
+
+<configuration>
+
+<property>
+  <name>hadoop.tmp.dir</name>
+  <value>/root/hadoop/tmp-dir/hadoop-hadoop</value>
+  <description>A base for other temporary directories.</description>
+</property>
+
+<property>
+  <name>fs.default.name</name>
+  <value>hdfs://hadoop.example.com:54310</value>
+  <description>The name of the default file system.  A URI whose
+  scheme and authority determine the FileSystem implementation.  The
+  uri's scheme determines the config property (fs.SCHEME.impl) naming
+  the FileSystem implementation class.  The uri's authority is used to
+  determine the host, port, etc. for a FileSystem.</description>
+</property>
+
+<property>
+  <name>mapred.job.tracker</name>
+  <value>hadoop.example.com:54311</value>
+  <description>The host and port that the MapReduce job tracker runs
+  at.  If "local", then jobs are run in-process as a single map
+  and reduce task.
+  </description>
+</property>
+
+<property>
+  <name>dfs.replication</name>
+  <value>1</value>
+  <description>Default block replication.
+  The actual number of replications can be specified when the file is created.
+  The default is used if replication is not specified in create time.
+  </description>
+</property>
+
+</configuration>
+END

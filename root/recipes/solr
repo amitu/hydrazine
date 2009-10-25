@@ -1,0 +1,49 @@
+#!/bin/bash
+set -e
+set -x
+
+SOFTDIR="/root/Downloads"
+perl -pi -e "s#universe#universe multiverse#g" /etc/apt/sources.list
+apt-get update
+apt-get install perl wget debconf-utils unzip -y
+debconf-set-selections debconf
+apt-get install sun-java6-jre -y
+
+if [ ! -f solr-tomcat ]; then
+    mkdir solr-tomcat
+fi
+cd solr-tomcat/
+
+if [ ! -f $SOFTDIR/apache-tomcat-6.0.20.zip ]; then
+    wget -O $SOFTDIR/apache-tomcat-6.0.20.zip http://mirrors.isc.org/pub/apache/tomcat/tomcat-6/v6.0.20/bin/apache-tomcat-6.0.20.zip
+fi
+unzip $SOFTDIR/apache-tomcat-6.0.20.zip
+
+if [ ! -f $SOFTDIR/apache-solr-1.3.0.zip ]; then
+    wget -O $SOFTDIR/apache-solr-1.3.0.zip http://apache.mirrors.hoobly.com/lucene/solr/1.3.0/apache-solr-1.3.0.zip
+fi
+unzip $SOFTDIR/apache-solr-1.3.0.zip
+
+cp apache-solr-1.3.0/dist/apache-solr-1.3.0.war apache-tomcat-6.0.20/webapps/solr.war
+cp apache-solr-1.3.0/dist/apache-solr-1.3.0.war apache-tomcat-6.0.20/webapps/ClassifiedsSolr.war
+cp -r apache-solr-1.3.0/example/solr .
+cp -r apache-solr-1.3.0/example/solr ClassifiedsSolr
+chmod a+x apache-tomcat-6.0.20/bin/*
+
+mkdir -p /root/solr-tomcat/apache-tomcat-6.0.20/conf/Catalina/localhost/
+cat <<END > /root/solr-tomcat/apache-tomcat-6.0.20/conf/Catalina/localhost/ClassifiedsSolr.xml
+<Context docBase="/root/solr-tomcat/apache-tomcat-6.0.20/webapps/ClassifiedsSolr.war" debug="0" crossContext="true" >
+    <Environment name="solr/home" type="java.lang.String" value="/root/solr-tomcat/ClassifiedsSolr" override="true" />
+</Context>
+END
+
+perl -pi -e 's#<abortOnConfigurationError>\${solr.abortOnConfigurationError:true}</abortOnConfigurationError>#<abortOnConfigurationError>false</abortOnConfigurationError>#g' /root/solr-tomcat/ClassifiedsSolr/conf/solrconfig.xml
+perl -pi -e 's#solr.data.dir:./solr/data#solr.data.dir:/root/solr-tomcat/ClassifiedsSolr/data#g' /root/solr-tomcat/ClassifiedsSolr/conf/solrconfig.xml
+cp /root/schema.xml /root/solr-tomcat/ClassifiedsSolr/conf/
+
+./apache-tomcat-6.0.20/bin/startup.sh
+
+echo 'alias start="cd /root/solr-tomcat;./apache-tomcat-6.0.20/bin/startup.sh;cd -"' >> /root/.bash_profile
+echo 'alias stop="cd /root/solr-tomcat;./apache-tomcat-6.0.20/bin/shutdown.sh;cd -"' >> /root/.bash_profile
+
+set +x

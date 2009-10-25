@@ -1,0 +1,28 @@
+#!/bin/bash
+
+set -e
+
+SOFTDIR="/root/Downloads"
+
+PACKAGES="vim php5-snmp php5-snmp rrdtool logrotate snmp php5-mysql "
+PACKAGES+="wget mysql-client dbconfig-common php5-cli php5 libedit2 "
+PACKAGES+="dbconfig-common patch "
+
+apt-get install $PACKAGES -y
+
+# apt has 0.8.7b
+if [ ! -f $SOFTDIR/cacti-0.8.7e.tar.gz ]; then
+    wget -O $SOFTDIR/cacti-0.8.7e.tar.gz http://www.cacti.net/downloads/cacti-0.8.7e.tar.gz
+fi
+
+tar -xzf $SOFTDIR/cacti-0.8.7e.tar.gz
+mv cacti-0.8.7e cacti
+cd cacti
+wget http://www.cacti.net/downloads/patches/0.8.7e/cli_add_graph.patch
+wget http://www.cacti.net/downloads/patches/0.8.7e/snmp_invalid_response.patch
+wget http://www.cacti.net/downloads/patches/0.8.7e/template_duplication.patch
+wget http://www.cacti.net/downloads/patches/0.8.7e/fix_icmp_on_windows_iis_servers.patch
+patch -p1 -N < cli_add_graph.patch
+patch -p1 -N < snmp_invalid_response.patch
+patch -p1 -N < template_duplication.patch
+patch -p1 -N < fix_icmp_on_windows_iis_servers.patch

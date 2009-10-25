@@ -10,6 +10,7 @@ requires on developer machine: apt-cacher-ng, schroot, debootstrap.
 (host) $ # work work
 (host) $ ./build
 (host) $ sudo ./prepare_mbox
+(mbox) $ ./init_mbox
 (mbox) $ ./test_mbox
 (mbox) if errors, tinker tinker
 (mbox) $ ./test_mbox

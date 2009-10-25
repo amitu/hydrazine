@@ -1,0 +1,24 @@
+#!/bin/bash
+set -e
+
+# Setting debconf 
+apt-get install debconf debconf-utils -y
+
+echo -e "mysql-server-5.0\tmysql-server/root_password\tpassword\t`config ROOT_PASSWORD`" > debconf
+echo -e "mysql-server-5.0\tmysql-server/root_password_again\tpassword\t`config ROOT_PASSWORD`" >> debconf
+
+debconf-set-selections debconf
+
+# Install mysql server
+PACKAGES="mysql-server vim"
+
+set +e
+apt-get install $PACKAGES -y
+
+set -e
+
+# Configuring mysql port
+perl -pi -e "s#= 3306#= `config MYSQL_PORT`#g" /etc/mysql/my.cnf
+
+# Restarting mysql
+/etc/init.d/mysql restart

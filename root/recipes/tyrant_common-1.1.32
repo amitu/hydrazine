@@ -1,0 +1,33 @@
+#!/bin/bash
+
+set -e
+SOFTDIR="/root/Downloads"
+
+PACKAGES="vim screen libbz2-dev zlib1g-dev liblua5.1-0 liblua5.1-0-dev lua5.1 "
+PACKAGES+="wget build-essential "
+
+apt-get install $PACKAGES -y
+
+if [ ! -f $SOFTDIR/tokyotyrant-1.1.32.tar.gz ]; then
+    wget -O $SOFTDIR/tokyotyrant-1.1.32.tar.gz http://tokyocabinet.sourceforge.net/tyrantpkg/tokyotyrant-1.1.32.tar.gz
+fi
+
+if [ ! -f $SOFTDIR/tokyocabinet-1.4.29.tar.gz ]; then
+    wget -O $SOFTDIR/tokyocabinet-1.4.29.tar.gz http://tokyocabinet.sourceforge.net/tokyocabinet-1.4.29.tar.gz
+fi
+
+tar -xzf $SOFTDIR/tokyocabinet-1.4.29.tar.gz
+cd tokyocabinet-1.4.29
+./configure && make && make install
+cd ..
+rm -rf tokyocabinet-1.4.29
+
+tar -xzf $SOFTDIR/tokyotyrant-1.1.32.tar.gz
+cd tokyotyrant-1.1.32
+./configure --enable-lua && make && make install
+cd ..
+rm -rf tokyotyrant-1.1.32
+
+if [ ! -d "/root/Datadir/tyrant" ]; then
+    mkdir /root/Datadir/tyrant
+fi

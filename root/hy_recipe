@@ -1,0 +1,3 @@
+#!/bin/sh
+
+./recipes/$1 $2

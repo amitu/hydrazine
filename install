@@ -1,14 +1,30 @@
 #!/bin/sh
-
+set -e
+set -x
 apt-get install schroot debootstrap apt-cacher-ng
 
 (echo "g/home/d"; echo 'wq') | ex -s /etc/schroot/mount-defaults
+
+echo "Downloading ubuntu iso"
+#wget -c -O "/mnt/ubuntu-8.04.3-server-i386.iso" http://ubuntu.interhost.co.il/hardy/ubuntu-8.04.3-server-i386.iso
+
+if [ ! -d "/mnt/Downloads" ];then
+    mkdir /mnt/Downloads
+fi
+
 if [ "`grep Downloads /etc/schroot/mount-defaults`" = "" ];then
-    echo "/var/Downloads  /root/Downloads none    rw,bind 0   0" >> /etc/schroot/mount-defaults
+    echo "/mnt/Downloads  /root/Downloads none    rw,bind 0   0" >> /etc/schroot/mount-defaults
+fi
+
+if [ ! -d "/mnt/Datadir" ];then
+    mkdir /mnt/Datadir
+fi
+
+if [ "`grep Datadir /etc/schroot/mount-defaults`" = "" ];then
+    echo "/mnt/Datadir  /root/Datadir none    rw,bind 0   0" >> /etc/schroot/mount-defaults
 fi
 
 cat <<END > /etc/schroot/copyfiles-defaults
-/etc/hosts
 /etc/resolv.conf
 END
 
@@ -21,3 +37,5 @@ cp -rf root /usr/share/hydrazine/
 
 mkdir -p /usr/share/hydrazine/template
 cp -rf template/ /usr/share/hydrazine/
+
+set +x

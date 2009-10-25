@@ -14,7 +14,7 @@ PWD=`pwd`
 hydra_name=`basename $PWD`
 
 mkdir -p ubuntu_mount 
-mount -o loop /var/ubuntu-8.04.2-server-i386.iso ubuntu_mount
+mount -o loop /mnt/ubuntu-8.04.3-server-i386.iso ubuntu_mount
 trap 'umount ubuntu_mount' 0 2 3 6 9 11 13 15 17
 debootstrap --arch i386 hardy mbox file://`pwd`/ubuntu_mount
 umount ubuntu_mount
@@ -24,12 +24,24 @@ if [ -d ${HYDRA_BASE-"/usr/share/hydrazine/root"} ]; then
     cp -r ${HYDRA_BASE-"/usr/share/hydrazine/root"} mbox
 fi
 
+if [ -d "../common_hydra" ]; then
+    cp -r "../common_hydra/"* mbox/root
+fi
+
+cp /etc/hosts mbox/etc/hosts
+
 # this makes sure we can set root's .vimrc etc
 cp -r root mbox
-if [ -d "/var/Downloads" ]; then
+if [ -d "/mnt/Downloads" ]; then
     echo "Downloads exists"
 else
-    mkdir "/var/Downloads"
+    mkdir "/mnt/Downloads"
+fi
+
+if [ -d "/mnt/Datadir" ]; then
+    echo "Datadir exists"
+else
+    mkdir "/mnt/Datadir"
 fi
 
 mkdir -p /etc/schroot/hydrazine
@@ -53,7 +65,10 @@ if [ -f "post_prepare" ]; then
     ./post_prepare
 fi
 
+echo "set -o ignoreeof" >> mbox/etc/bash.bashrc
+#mkdir mbox/checkout
+########################MOUNTING############################
+#mount -o bind `dirname \`pwd\`` mbox/checkout
 echo Setup complete, launching shell.
 echo You can do 'sudo schroot -c mbox' to do it later on.
 exec schroot -c ${hydra_name} -d /root
-

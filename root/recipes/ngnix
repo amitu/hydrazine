@@ -1,0 +1,11 @@
+#!/bin/bash
+
+set -e
+
+PACKAGES="vim nginx apache2-utils "
+
+apt-get install $PACKAGES -y
+
+cp nginx_default /etc/nginx/sites-enabled/default
+
+/etc/init.d/nginx start

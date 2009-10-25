@@ -1,0 +1,4 @@
+#!/bin/bash
+
+sed -i '/# ETC/,$ d' /etc/hosts
+cat /root/hosts.$1 >> /etc/hosts

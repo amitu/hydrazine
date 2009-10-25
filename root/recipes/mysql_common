@@ -1,0 +1,29 @@
+#!/bin/bash
+set -e
+
+# Setting debconf
+apt-get install debconf debconf-utils -y
+
+echo -e "mysql-server-5.0\tmysql-server/root_password\tpassword\t`config ROOT_PASSWORD`" > debconf
+echo -e "mysql-server-5.0\tmysql-server/root_password_again\tpassword\t`config ROOT_PASSWORD`" >> debconf
+
+debconf-set-selections debconf
+
+# Install mysql server
+PACKAGES="mysql-server vim"
+
+apt-get install $PACKAGES -y
+
+PASSWORD=`config ROOT_PASSWORD`
+PROD_SUBNET=`config PROD_SUBNET`
+# Restarting mysql
+if [ "`mysql -p$PASSWORD -Dmysql -e 'select host from user' | grep $PROD_SUBNET`" != "$PROD_SUBNET" ]; then
+    mysql -p$PASSWORD -e "GRANT ALL ON *.* TO 'root'@'$PROD_SUBNET' IDENTIFIED BY '`config ROOT_PASSWORD`'; FLUSH PRIVILEGES;"
+    echo "++++++++++++++++Access to subnet Provided"
+else
+    echo "++++++++++++++++Access to subnet already exists"
+fi
+
+/etc/init.d/mysql stop
+# Configuring mysql port & datadir
+perl -pi -e "s#= 3306#= `config MYSQL_PORT`#g" /etc/mysql/my.cnf

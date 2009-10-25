@@ -31,6 +31,10 @@ echo 'Asia/Kolkata' > /etc/timezone
 dpkg-reconfigure -f noninteractive tzdata
 # }}}
 
+if [ -f "common_init" ]; then
+    . common_init
+fi
+
 if [ -f "init_app" ]; then
     . init_app
 fi
